@@ -9,7 +9,7 @@ import { Slider } from '@/components/ui/slider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getTowerTokenBalance } from '@/lib/token';
 import { connection } from '@/lib/config';
-import { executePurchaseTransaction, sellTowerTokens, calculateSOLForTokens } from '@/lib/token-purchase';
+import { calculateSOLForTokens } from '@/lib/token-purchase';
 import { getPriceDisplay, getTowerForSOL, getSOLPriceUSD } from '@/lib/price-service';
 import { 
   Coins, 
@@ -268,19 +268,42 @@ export function BuyTokens({ onTokensPurchased }: BuyTokensProps) {
     setIsSelling(true);
 
     try {
-      const result = await sellTowerTokens(
-        publicKey,
-        sellTokenAmount,
-        sendTransaction
-      );
-      
-      if (result.success) {
-        toast.success(result.message);
-        await getSolBalance();
-        await getTokenBalance();
-      } else {
-        toast.error(result.message);
+      // Get the sell transaction from the server
+      const response = await fetch('/api/token/sell', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sellerWallet: publicKey.toString(),
+          tokenAmount: sellTokenAmount
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast.error(result.error || 'Failed to create sell transaction');
+        return;
       }
+
+      if (!result.success) {
+        toast.error(result.message || 'Sale failed');
+        return;
+      }
+
+      // Deserialize and send the transaction
+      const transaction = Transaction.from(Buffer.from(result.transaction, 'base64'));
+      
+      // Send the transaction
+      const txHash = await sendTransaction(transaction, connection);
+      
+      // Wait for confirmation
+      await connection.confirmTransaction(txHash, 'confirmed');
+      
+      toast.success(`Successfully sold ${sellTokenAmount} TOWER tokens for ${result.solAmount.toFixed(4)} SOL!`);
+      await getSolBalance();
+      await getTokenBalance();
       
     } catch (error) {
       console.error('Error selling tokens:', error);
