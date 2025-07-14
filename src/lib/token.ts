@@ -429,11 +429,12 @@ export async function transferTowerTokensToPlayer(
     // Calculate transfer amount with decimals
     const transferAmount = Math.floor(amount * Math.pow(10, TOWER_TOKEN_CONFIG.decimals));
 
-    // Load treasury keypair to sign the transfer
-    const TREASURY_PRIVATE_KEY = [
-      17,26,103,202,121,7,124,191,249,194,171,237,47,39,108,78,192,116,253,185,131,255,179,163,240,50,74,55,226,53,167,52,245,146,173,81,201,72,150,29,220,6,67,142,131,231,244,221,54,217,174,142,120,68,15,210,47,124,218,95,223,49,192,40
-    ];
-    const TREASURY_KEYPAIR = Keypair.fromSecretKey(new Uint8Array(TREASURY_PRIVATE_KEY));
+    // Load treasury keypair from environment variables
+    const TREASURY_PRIVATE_KEY = process.env.TREASURY_PRIVATE_KEY;
+    if (!TREASURY_PRIVATE_KEY) {
+      throw new Error('TREASURY_PRIVATE_KEY environment variable not set');
+    }
+    const TREASURY_KEYPAIR = Keypair.fromSecretKey(new Uint8Array(JSON.parse(TREASURY_PRIVATE_KEY)));
 
     // Add transfer instruction from treasury to player
     transaction.add(
@@ -570,11 +571,12 @@ export async function burnTowerTokensFromTreasury(
     // Treasury wallet (where game stakes are held)
     const TREASURY_WALLET = new PublicKey('HXccFqisBhUHCxPD2fSGZPyZaYJhxufie6we2fehx2NB');
     
-    // Load treasury keypair to sign the transaction
-    const TREASURY_PRIVATE_KEY = [
-      17,26,103,202,121,7,124,191,249,194,171,237,47,39,108,78,192,116,253,185,131,255,179,163,240,50,74,55,226,53,167,52,245,146,173,81,201,72,150,29,220,6,67,142,131,231,244,221,54,217,174,142,120,68,15,210,47,124,218,95,223,49,192,40
-    ];
-    const TREASURY_KEYPAIR = Keypair.fromSecretKey(new Uint8Array(TREASURY_PRIVATE_KEY));
+    // Load treasury keypair from environment variables
+    const TREASURY_PRIVATE_KEY = process.env.TREASURY_PRIVATE_KEY;
+    if (!TREASURY_PRIVATE_KEY) {
+      throw new Error('TREASURY_PRIVATE_KEY environment variable not set');
+    }
+    const TREASURY_KEYPAIR = Keypair.fromSecretKey(new Uint8Array(JSON.parse(TREASURY_PRIVATE_KEY)));
     
     // Set treasury as fee payer
     transaction.feePayer = TREASURY_KEYPAIR.publicKey;

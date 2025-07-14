@@ -17,13 +17,16 @@ import { getTowerForSOL, getSOLForTower } from './price-service';
 // This is your treasury wallet - in production, store this securely
 const TREASURY_WALLET = new PublicKey('HXccFqisBhUHCxPD2fSGZPyZaYJhxufie6we2fehx2NB');
 
-// Token authority keypair (loaded from your deployment)
-// In production, this should be stored securely (env vars, AWS KMS, etc.)
-const TOKEN_AUTHORITY_PRIVATE_KEY = [
-  17,26,103,202,121,7,124,191,249,194,171,237,47,39,108,78,192,116,253,185,131,255,179,163,240,50,74,55,226,53,167,52,245,146,173,81,201,72,150,29,220,6,67,142,131,231,244,221,54,217,174,142,120,68,15,210,47,124,218,95,223,49,192,40
-];
+// Token authority keypair loaded from environment variables
+const getTokenAuthorityKeypair = () => {
+  const TOKEN_AUTHORITY_PRIVATE_KEY = process.env.TREASURY_PRIVATE_KEY;
+  if (!TOKEN_AUTHORITY_PRIVATE_KEY) {
+    throw new Error('TREASURY_PRIVATE_KEY environment variable not set');
+  }
+  return Keypair.fromSecretKey(new Uint8Array(JSON.parse(TOKEN_AUTHORITY_PRIVATE_KEY)));
+};
 
-const TOKEN_AUTHORITY_KEYPAIR = Keypair.fromSecretKey(new Uint8Array(TOKEN_AUTHORITY_PRIVATE_KEY));
+const TOKEN_AUTHORITY_KEYPAIR = getTokenAuthorityKeypair();
 
 export async function createTokenPurchaseTransaction(
   buyerWallet: PublicKey,
@@ -179,11 +182,12 @@ export async function sellTowerTokens(
       )
     );
     
-    // Load treasury keypair to send SOL
-    const TREASURY_PRIVATE_KEY = [
-      17,26,103,202,121,7,124,191,249,194,171,237,47,39,108,78,192,116,253,185,131,255,179,163,240,50,74,55,226,53,167,52,245,146,173,81,201,72,150,29,220,6,67,142,131,231,244,221,54,217,174,142,120,68,15,210,47,124,218,95,223,49,192,40
-    ];
-    const TREASURY_KEYPAIR = Keypair.fromSecretKey(new Uint8Array(TREASURY_PRIVATE_KEY));
+    // Load treasury keypair from environment variables
+    const TREASURY_PRIVATE_KEY = process.env.TREASURY_PRIVATE_KEY;
+    if (!TREASURY_PRIVATE_KEY) {
+      throw new Error('TREASURY_PRIVATE_KEY environment variable not set');
+    }
+    const TREASURY_KEYPAIR = Keypair.fromSecretKey(new Uint8Array(JSON.parse(TREASURY_PRIVATE_KEY)));
     
     // Transfer SOL from treasury to seller
     transaction.add(
