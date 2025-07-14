@@ -18,6 +18,7 @@ import {
   createTransferInstruction,
 } from '@solana/spl-token';
 import { connection, TOWER_TOKEN_MINT_ADDRESS } from './config';
+import { getTreasuryKeypair, isTreasuryAvailable } from './env-utils';
 
 // Tower Game Token Configuration
 export const TOWER_TOKEN_CONFIG = {
@@ -430,11 +431,10 @@ export async function transferTowerTokensToPlayer(
     const transferAmount = Math.floor(amount * Math.pow(10, TOWER_TOKEN_CONFIG.decimals));
 
     // Load treasury keypair from environment variables
-    const TREASURY_PRIVATE_KEY = process.env.TREASURY_PRIVATE_KEY;
-    if (!TREASURY_PRIVATE_KEY) {
-      throw new Error('TREASURY_PRIVATE_KEY environment variable not set');
+    const TREASURY_KEYPAIR = getTreasuryKeypair();
+    if (!TREASURY_KEYPAIR) {
+      throw new Error('Treasury keypair not available - check environment configuration');
     }
-    const TREASURY_KEYPAIR = Keypair.fromSecretKey(new Uint8Array(JSON.parse(TREASURY_PRIVATE_KEY)));
 
     // Add transfer instruction from treasury to player
     transaction.add(
@@ -572,11 +572,10 @@ export async function burnTowerTokensFromTreasury(
     const TREASURY_WALLET = new PublicKey('HXccFqisBhUHCxPD2fSGZPyZaYJhxufie6we2fehx2NB');
     
     // Load treasury keypair from environment variables
-    const TREASURY_PRIVATE_KEY = process.env.TREASURY_PRIVATE_KEY;
-    if (!TREASURY_PRIVATE_KEY) {
-      throw new Error('TREASURY_PRIVATE_KEY environment variable not set');
+    const TREASURY_KEYPAIR = getTreasuryKeypair();
+    if (!TREASURY_KEYPAIR) {
+      throw new Error('Treasury keypair not available - check environment configuration');
     }
-    const TREASURY_KEYPAIR = Keypair.fromSecretKey(new Uint8Array(JSON.parse(TREASURY_PRIVATE_KEY)));
     
     // Set treasury as fee payer
     transaction.feePayer = TREASURY_KEYPAIR.publicKey;

@@ -13,20 +13,15 @@ import {
 } from '@solana/spl-token';
 import { connection, TOWER_TOKEN_MINT_ADDRESS } from './config';
 import { getTowerForSOL, getSOLForTower } from './price-service';
+import { getTreasuryKeypair, isTreasuryAvailable } from './env-utils';
 
 // This is your treasury wallet - in production, store this securely
 const TREASURY_WALLET = new PublicKey('HXccFqisBhUHCxPD2fSGZPyZaYJhxufie6we2fehx2NB');
 
-// Token authority keypair loaded from environment variables
-const getTokenAuthorityKeypair = () => {
-  const TOKEN_AUTHORITY_PRIVATE_KEY = process.env.TREASURY_PRIVATE_KEY;
-  if (!TOKEN_AUTHORITY_PRIVATE_KEY) {
-    throw new Error('TREASURY_PRIVATE_KEY environment variable not set');
-  }
-  return Keypair.fromSecretKey(new Uint8Array(JSON.parse(TOKEN_AUTHORITY_PRIVATE_KEY)));
+// Use the shared treasury keypair utility
+const getTokenAuthorityKeypairLazy = () => {
+  return getTreasuryKeypair();
 };
-
-const TOKEN_AUTHORITY_KEYPAIR = getTokenAuthorityKeypair();
 
 export async function createTokenPurchaseTransaction(
   buyerWallet: PublicKey,
@@ -84,7 +79,7 @@ export async function createTokenPurchaseTransaction(
     createTransferInstruction(
       treasuryTokenAccount, // from treasury
       buyerTokenAccount, // to buyer
-      TOKEN_AUTHORITY_KEYPAIR.publicKey, // treasury authority
+      getTokenAuthorityKeypairLazy()?.publicKey || TREASURY_WALLET, // treasury authority
       tokenAmount // amount (with decimals)
     )
   );
@@ -105,7 +100,10 @@ export async function executePurchaseTransaction(
     const transaction = await createTokenPurchaseTransaction(buyerWallet, solAmount);
     
     // Add the token authority as a signer for the mint instruction
-    transaction.partialSign(TOKEN_AUTHORITY_KEYPAIR);
+    const authorityKeypair = getTokenAuthorityKeypairLazy();
+    if (authorityKeypair) {
+      transaction.partialSign(authorityKeypair);
+    }
     
     // Send the transaction
     const txHash = await sendTransaction(transaction, connection);
@@ -183,11 +181,10 @@ export async function sellTowerTokens(
     );
     
     // Load treasury keypair from environment variables
-    const TREASURY_PRIVATE_KEY = process.env.TREASURY_PRIVATE_KEY;
-    if (!TREASURY_PRIVATE_KEY) {
-      throw new Error('TREASURY_PRIVATE_KEY environment variable not set');
+    const TREASURY_KEYPAIR = getTreasuryKeypair();
+    if (!TREASURY_KEYPAIR) {
+      throw new Error('Treasury keypair not available - check environment configuration');
     }
-    const TREASURY_KEYPAIR = Keypair.fromSecretKey(new Uint8Array(JSON.parse(TREASURY_PRIVATE_KEY)));
     
     // Transfer SOL from treasury to seller
     transaction.add(
