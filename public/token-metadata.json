@@ -1,0 +1,54 @@
+{
+  "name": "Tower Gamble Token",
+  "symbol": "TOWER",
+  "description": "The native token for Tower Gamble game - stake to play and win! A deflationary gaming token where players stake TOWER tokens to climb a 10-floor tower for exponential rewards.",
+  "image": "https://your-domain.com/tower-token-logo.png",
+  "external_url": "https://your-domain.com",
+  "decimals": 6,
+  "tags": ["gaming", "defi", "solana", "token"],
+  "creator": {
+    "name": "Tower Gamble Team",
+    "site": "https://your-domain.com"
+  },
+  "extensions": {
+    "website": "https://your-domain.com",
+    "twitter": "https://twitter.com/your-handle",
+    "telegram": "https://t.me/your-channel",
+    "discord": "https://discord.gg/your-server"
+  },
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Gaming Token"
+    },
+    {
+      "trait_type": "Blockchain",
+      "value": "Solana"
+    },
+    {
+      "trait_type": "Use Case",
+      "value": "Tower Gamble Game"
+    },
+    {
+      "trait_type": "Token Model",
+      "value": "Deflationary"
+    },
+    {
+      "trait_type": "Max Supply",
+      "value": "1,000,000,000"
+    },
+    {
+      "trait_type": "Game Mechanics",
+      "value": "Stake to Play"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "https://your-domain.com/tower-token-logo.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+} 

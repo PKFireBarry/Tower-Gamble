@@ -1,0 +1,13 @@
+{
+  "mintAddress": "7zQ4Wvt66PYe4ijnjNZwGNxAjnsWYqvBQSushtbX6Rds",
+  "authority": "HXccFqisBhUHCxPD2fSGZPyZaYJhxufie6we2fehx2NB",
+  "network": "devnet",
+  "createdAt": "2025-07-12T12:29:58.091Z",
+  "name": "Tower Gamble Token",
+  "symbol": "TOWER",
+  "decimals": 6,
+  "totalSupply": 1000000000,
+  "description": "The native token for Tower Gamble game - stake to play and win!",
+  "image": "https://your-domain.com/tower-token-logo.png",
+  "initialPrice": 0.001
+}

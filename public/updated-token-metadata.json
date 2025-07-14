@@ -1,0 +1,75 @@
+{
+  "name": "Tower Gamble Token",
+  "symbol": "TOWER",
+  "description": "The native utility token for Tower Gamble - a skill-based blockchain game where players stake TOWER tokens to climb a 10-floor tower for exponential rewards. Features deflationary tokenomics with progressive risk tiers and 51% house edge.",
+  "image": "https://your-domain.com/tower-token-logo.png",
+  "external_url": "https://your-domain.com",
+  "decimals": 6,
+  "tags": ["gaming", "defi", "solana", "utility-token", "deflationary"],
+  "creator": {
+    "name": "Tower Gamble Team",
+    "site": "https://your-domain.com"
+  },
+  "extensions": {
+    "website": "https://your-domain.com",
+    "twitter": "https://twitter.com/towergamble",
+    "telegram": "https://t.me/towergamble",
+    "discord": "https://discord.gg/towergamble",
+    "github": "https://github.com/your-username/solana-game"
+  },
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Gaming Utility Token"
+    },
+    {
+      "trait_type": "Blockchain",
+      "value": "Solana"
+    },
+    {
+      "trait_type": "Use Case",
+      "value": "Tower Gamble Game Stakes"
+    },
+    {
+      "trait_type": "Token Model",
+      "value": "Deflationary"
+    },
+    {
+      "trait_type": "Max Supply",
+      "value": "1,000,000,000"
+    },
+    {
+      "trait_type": "Game Mechanics",
+      "value": "Progressive Risk Tiers"
+    },
+    {
+      "trait_type": "Win Rate",
+      "value": "49% (51% house edge)"
+    },
+    {
+      "trait_type": "Network",
+      "value": "Solana DevNet"
+    },
+    {
+      "trait_type": "Token Price",
+      "value": "0.0001 SOL per TOWER"
+    },
+    {
+      "trait_type": "Floors",
+      "value": "10 Tower Floors"
+    },
+    {
+      "trait_type": "Risk Tiers",
+      "value": "3 Progressive Tiers"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "https://your-domain.com/tower-token-logo.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+} 

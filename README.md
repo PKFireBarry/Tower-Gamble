@@ -1,36 +1,108 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tower Gamble - Solana Game
 
-## Getting Started
+A thrilling tower climbing game built on Solana blockchain where players stake tokens to climb a tower and win bigger rewards!
 
-First, run the development server:
+## 🎮 Game Overview
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Tower Gamble is a simple yet addictive game where players:
+- Stake tokens to start climbing a 10-floor tower
+- Each floor has a 49% chance of success (51% house edge)
+- Players can cash out at any time to secure their winnings
+- Payouts increase exponentially with each floor climbed
+- Reach the top for maximum rewards!
+
+## 🛠 Tech Stack
+
+- **Frontend**: Next.js 15 with React 19
+- **Styling**: Tailwind CSS + Shadcn UI
+- **Blockchain**: Solana Web3.js
+- **Wallet**: Solana Wallet Adapter
+- **Language**: TypeScript
+
+## 🚀 Getting Started
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd solana-game
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+
+4. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## 🎯 How to Play
+
+1. **Connect Wallet**: Click "Connect Wallet" and connect your Solana wallet
+2. **Set Stake**: Use the slider to set your stake amount (0.1 - 100 tokens)
+3. **Start Game**: Click "Start Game" to begin climbing
+4. **Make Decisions**: At each floor, choose to:
+   - **Ascend**: Risk it all for higher rewards
+   - **Cash Out**: Secure your current winnings
+5. **Win or Lose**: Each ascent has a 49% success rate
+
+## 🎲 Game Mechanics
+
+- **House Edge**: 51% (49% player win rate)
+- **Floors**: 10 total floors
+- **Multiplier**: 1.5x per floor
+- **Stake Range**: 0.1 - 100 tokens
+- **Payout Formula**: `stake × (1.5 ^ floor)`
+
+## 🔧 Configuration
+
+Game settings can be modified in `src/lib/config.ts`:
+
+```typescript
+export const GAME_CONFIG = {
+  name: 'Tower Gamble',
+  houseEdge: 51,
+  minStake: 0.1,
+  maxStake: 100,
+  maxFloors: 10,
+  baseMultiplier: 1.5,
+} as const;
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📱 Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Responsive Design**: Works on desktop and mobile
+- **Real-time Updates**: Live game state updates
+- **Game History**: Track your recent games
+- **Wallet Integration**: Seamless Solana wallet connection
+- **Toast Notifications**: User-friendly feedback
+- **Progressive Web App**: Installable on mobile devices
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🔮 Future Enhancements
 
-## Learn More
+- [ ] Implement actual Solana program for on-chain randomness
+- [ ] Add SPL token integration
+- [ ] Create leaderboards
+- [ ] Add sound effects and animations
+- [ ] Implement multiplayer tournaments
+- [ ] Add achievement system
 
-To learn more about Next.js, take a look at the following resources:
+## 🛡 Security Note
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+This is a demo version using client-side randomness. For production use, implement:
+- On-chain Solana program for verifiable randomness
+- Proper token escrow mechanisms
+- Audit smart contracts
+- Implement proper access controls
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📄 License
 
-## Deploy on Vercel
+This project is licensed under the MIT License.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🤝 Contributing
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Contributions are welcome! Please feel free to submit a Pull Request.
