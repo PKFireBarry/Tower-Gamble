@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { Transaction } from '@solana/web3.js';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -26,8 +27,9 @@ import {
 import { toast } from 'sonner';
 import { BuyTokens } from './buy-tokens';
 import { ModernHeader } from './ui/modern-header';
-import { getTowerTokenBalance, transferTowerTokensFromUser, transferTowerTokensToPlayer, burnTowerTokensFromTreasury } from '@/lib/token';
+import { getTowerTokenBalance, transferTowerTokensFromUser } from '@/lib/token';
 import { getTokenAmountFormatted } from '@/lib/price-service';
+import { connection } from '@/lib/config';
 import Image from 'next/image';
 
 export function TowerGame() {
@@ -217,16 +219,39 @@ export function TowerGame() {
     } else if (result === 'failure') {
       // Burn the staked tokens from treasury (deflationary mechanism)
       try {
-        const burnResult = await burnTowerTokensFromTreasury(
-          gameState.stake,
-          sendTransaction
-        );
-        
-        if (burnResult.success) {
-          toast.error('Tower collapsed! Your tokens were burned (removed from supply).');
-        } else {
-          toast.error(`Tower collapsed! Failed to burn tokens: ${burnResult.message}`);
+        // Get the burn transaction from the server
+        const response = await fetch('/api/token/burn', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            amount: gameState.stake
+          }),
+        });
+
+        const burnResult = await response.json();
+
+        if (!response.ok) {
+          toast.error(`Tower collapsed! Failed to burn tokens: ${burnResult.error || 'Unknown error'}`);
+          return;
         }
+
+        if (!burnResult.success) {
+          toast.error(`Tower collapsed! Failed to burn tokens: ${burnResult.message}`);
+          return;
+        }
+
+        // Deserialize and send the transaction
+        const transaction = Transaction.from(Buffer.from(burnResult.transaction, 'base64'));
+        
+        // Send the transaction
+        const txHash = await sendTransaction(transaction, connection);
+        
+        // Wait for confirmation
+        await connection.confirmTransaction(txHash, 'confirmed');
+        
+        toast.error('Tower collapsed! Your tokens were burned (removed from supply).');
         
         // Refresh token balance after losing
         const newBalance = await getTowerTokenBalance(publicKey);
@@ -254,25 +279,47 @@ export function TowerGame() {
     setIsLoading(true);
     
     try {
-      // Transfer tokens from treasury to player (real blockchain transaction)
-      const result = await transferTowerTokensToPlayer(
-        publicKey,
-        gameState.currentPayout,
-        sendTransaction
-      );
-      
-      if (result.success) {
-        const success = gameEngine.cashOut();
-        if (success) {
-          // Update local balance after successful mint
-          const newBalance = await getTowerTokenBalance(publicKey);
-          gameEngine.updateTokenBalance(newBalance);
-          toast.success(`Cashed out ${gameState.currentPayout} TOWER tokens on blockchain!`);
-        } else {
-          toast.error('Failed to cash out');
-        }
-      } else {
+      // Get the transfer transaction from the server
+      const response = await fetch('/api/token/transfer-to-player', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          playerWallet: publicKey.toString(),
+          amount: gameState.currentPayout
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast.error(`Failed to transfer tokens: ${result.error || 'Unknown error'}`);
+        return;
+      }
+
+      if (!result.success) {
         toast.error(`Failed to transfer tokens: ${result.message}`);
+        return;
+      }
+
+      // Deserialize and send the transaction
+      const transaction = Transaction.from(Buffer.from(result.transaction, 'base64'));
+      
+      // Send the transaction
+      const txHash = await sendTransaction(transaction, connection);
+      
+      // Wait for confirmation
+      await connection.confirmTransaction(txHash, 'confirmed');
+      
+      const success = gameEngine.cashOut();
+      if (success) {
+        // Update local balance after successful transfer
+        const newBalance = await getTowerTokenBalance(publicKey);
+        gameEngine.updateTokenBalance(newBalance);
+        toast.success(`Cashed out ${gameState.currentPayout} TOWER tokens on blockchain!`);
+      } else {
+        toast.error('Failed to cash out');
       }
     } catch (error) {
       console.error('Error cashing out:', error);
