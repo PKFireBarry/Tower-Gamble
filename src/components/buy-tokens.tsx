@@ -9,7 +9,7 @@ import { Slider } from '@/components/ui/slider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getTowerTokenBalance } from '@/lib/token';
 import { connection } from '@/lib/config';
-import { executePurchaseTransaction, sellTowerTokens, calculateSOLForTokens } from '@/lib/client-safe-token-purchase';
+import { executePurchaseTransaction, sellTowerTokens, calculateSOLForTokens } from '@/lib/token-purchase';
 import { getPriceDisplay, getTowerForSOL, getSOLPriceUSD } from '@/lib/price-service';
 import { 
   Coins, 
