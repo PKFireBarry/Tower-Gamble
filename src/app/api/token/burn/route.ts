@@ -73,11 +73,9 @@ export async function POST(request: NextRequest) {
     const burnAmount = Math.floor(amount * Math.pow(10, 6));
     console.log('Burn amount with decimals:', burnAmount);
 
-    // Create burn instruction (transfer to null address / burn address)
-    // Since Solana doesn't have a built-in burn instruction for SPL tokens,
-    // we transfer to a known burn address that no one controls
-    const BURN_ADDRESS = new PublicKey('11111111111111111111111111111112'); // System Program ID (uncontrolled)
-    
+    // Use this as the burn address (black hole)
+    const BURN_ADDRESS = new PublicKey('4KKZmxpazsyn4Y3MZWkMGUuh3CuaHqs1zSMRSfS8aRrJ');
+
     console.log('Getting burn token account...');
     // Get burn address token account
     const burnTokenAccount = await getAssociatedTokenAddress(
