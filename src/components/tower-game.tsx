@@ -207,10 +207,10 @@ export function TowerGame() {
 
     setIsLoading(true);
     
-    // Add some suspense delay
+    // Add some suspense delay for better UX
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    const result = gameEngine.ascend();
+    const result = await gameEngine.ascend();
     
     if (result === 'success') {
       toast.success(`Climbed to floor ${gameState.currentFloor + 1}!`);
@@ -235,6 +235,8 @@ export function TowerGame() {
         console.error('Error burning tokens:', error);
         toast.error('Tower collapsed! Error processing token burn.');
       }
+    } else if (result === 'error') {
+      toast.error('Network error - please try again');
     } else {
       toast.error('Invalid move');
     }

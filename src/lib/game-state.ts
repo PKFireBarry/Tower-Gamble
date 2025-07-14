@@ -21,6 +21,16 @@ export interface GameResult {
   finalPayout: number;
   status: 'won' | 'lost' | 'cashed-out';
   timestamp: number;
+  proof?: GameProof;
+}
+
+export interface GameProof {
+  serverSeed: string;
+  clientSeed: string;
+  nonce: number;
+  hash: string;
+  randomValue: number;
+  winProbability: number;
 }
 
 export const initialGameState: GameState = {
@@ -37,10 +47,59 @@ export const initialGameState: GameState = {
 export class GameEngine {
   private state: GameState;
   private listeners: Array<(state: GameState) => void> = [];
+  private playerId: string;
+  private clientSeed: string;
+  private currentGameProof: GameProof | null = null;
 
   constructor(initialState: GameState = initialGameState) {
     this.state = { ...initialState };
     this.updateProbabilityAndPayout();
+    
+    // Generate unique player ID and client seed for this session
+    this.playerId = this.generatePlayerId();
+    this.clientSeed = this.generateClientSeed();
+  }
+
+  // Generate unique player ID for this session
+  private generatePlayerId(): string {
+    return `player_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  // Generate client seed for provably fair gaming
+  private generateClientSeed(): string {
+    return Math.random().toString(36).substr(2, 16);
+  }
+
+  // Get player ID for API calls
+  private getPlayerId(): string {
+    return this.playerId;
+  }
+
+  // Get client seed for API calls
+  private getClientSeed(): string {
+    return this.clientSeed;
+  }
+
+  // Store game proof for transparency
+  private storeGameProof(proof: any, randomValue: number, winProbability: number): void {
+    this.currentGameProof = {
+      serverSeed: proof.serverSeed,
+      clientSeed: proof.clientSeed,
+      nonce: proof.nonce,
+      hash: proof.hash,
+      randomValue,
+      winProbability
+    };
+  }
+
+  // Get current game proof for verification
+  public getGameProof(): GameProof | null {
+    return this.currentGameProof;
+  }
+
+  // Allow players to set their own client seed
+  public setClientSeed(newClientSeed: string): void {
+    this.clientSeed = newClientSeed;
   }
 
   // Subscribe to state changes
@@ -112,8 +171,8 @@ export class GameEngine {
     return true;
   }
 
-  // Attempt to ascend to the next floor
-  ascend(): 'success' | 'failure' | 'invalid' {
+  // Attempt to ascend to the next floor using secure server-side randomness
+  async ascend(): Promise<'success' | 'failure' | 'invalid' | 'error'> {
     if (this.state.status !== 'playing') {
       return 'invalid';
     }
@@ -122,37 +181,59 @@ export class GameEngine {
       return 'invalid';
     }
 
-    // Simple random number generation for demo
-    // In production, this would be handled by the Solana program
-    const random = Math.random() * 100;
-    const winProbability = calculateWinProbability(
-      this.state.currentFloor,
-      this.state.riskLevel,
-      this.state.stake
-    );
-    
-    if (random <= winProbability) {
-      // Success - move to next floor
-      const newFloor = this.state.currentFloor + 1;
-      this.state = {
-        ...this.state,
-        currentFloor: newFloor,
-      };
+    try {
+      // Call server-side randomness API for secure outcome determination
+      const response = await fetch('/api/game/climb', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          playerId: this.getPlayerId(),
+          currentFloor: this.state.currentFloor,
+          riskLevel: this.state.riskLevel,
+          stake: this.state.stake,
+          clientSeed: this.getClientSeed()
+        }),
+      });
 
-      this.updateProbabilityAndPayout();
-
-      // Check if reached max floors (auto-win)
-      if (newFloor >= GAME_CONFIG.maxFloors) {
-        this.endGame('won');
-      } else {
-        this.notify();
+      if (!response.ok) {
+        console.error('Server randomness API error:', response.statusText);
+        return 'error';
       }
 
-      return 'success';
-    } else {
-      // Failure - game over
-      this.endGame('lost');
-      return 'failure';
+      const result = await response.json();
+      
+      // Store proof for transparency and player verification
+      this.storeGameProof(result.proof, result.randomValue, result.winProbability);
+      
+      if (result.result === 'win') {
+        // Success - move to next floor
+        const newFloor = this.state.currentFloor + 1;
+        this.state = {
+          ...this.state,
+          currentFloor: newFloor,
+        };
+
+        this.updateProbabilityAndPayout();
+
+        // Check if reached max floors (auto-win)
+        if (newFloor >= GAME_CONFIG.maxFloors) {
+          this.endGame('won');
+        } else {
+          this.notify();
+        }
+
+        return 'success';
+      } else {
+        // Failure - game over
+        this.endGame('lost');
+        return 'failure';
+      }
+
+    } catch (error) {
+      console.error('Error getting game outcome from server:', error);
+      return 'error';
     }
   }
 
@@ -176,6 +257,7 @@ export class GameEngine {
       finalPayout: status === 'lost' ? 0 : this.state.currentPayout,
       status,
       timestamp: Date.now(),
+      proof: this.currentGameProof || undefined,
     };
 
     this.state = {
