@@ -11,7 +11,6 @@ import { GAME_CONFIG, RISK_PRESETS, getRiskInfo, calculatePayout } from '@/lib/c
 import { 
   ArrowUp, 
   DollarSign, 
-  TrendingUp, 
   Trophy, 
   X, 
   Wallet, 
@@ -29,6 +28,7 @@ import { BuyTokens } from './buy-tokens';
 import { ModernHeader } from './ui/modern-header';
 import { getTowerTokenBalance, transferTowerTokensFromUser, transferTowerTokensToPlayer, burnTowerTokensFromTreasury } from '@/lib/token';
 import { getTokenAmountFormatted } from '@/lib/price-service';
+import Image from 'next/image';
 
 export function TowerGame() {
   const { connected, publicKey, sendTransaction } = useWallet();
@@ -389,10 +389,12 @@ export function TowerGame() {
             <Card className="modern-card">
               <CardContent className="p-8 text-center">
                 <div className="flex items-center justify-center gap-3 mb-6">
-            <img 
+            <Image 
               src="/logo.png" 
               alt="Tower Gamble Logo" 
-                    className="w-12 h-12 object-contain"
+              width={48}
+              height={48}
+              className="object-contain"
                   />
                   <Wallet className="w-12 h-12 text-primary" />
                 </div>

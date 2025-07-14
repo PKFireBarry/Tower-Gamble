@@ -3,17 +3,15 @@ import {
   Transaction, 
   SystemProgram, 
   LAMPORTS_PER_SOL,
-  Keypair,
-  TransactionInstruction
+  Keypair
 } from '@solana/web3.js';
 import {
   getAssociatedTokenAddress,
   createAssociatedTokenAccountInstruction,
   getAccount,
-  createMintToInstruction,
   createTransferInstruction
 } from '@solana/spl-token';
-import { connection, TOWER_TOKEN_MINT_ADDRESS, connectionManager } from './config';
+import { connection, TOWER_TOKEN_MINT_ADDRESS } from './config';
 import { getTowerForSOL, getSOLForTower } from './price-service';
 
 // This is your treasury wallet - in production, store this securely

@@ -16,7 +16,6 @@ import {
   createAssociatedTokenAccountInstruction,
   getAssociatedTokenAddress,
   createTransferInstruction,
-  createMintToInstruction,
 } from '@solana/spl-token';
 import { connection, TOWER_TOKEN_MINT_ADDRESS } from './config';
 
@@ -321,12 +320,6 @@ export async function burnTowerTokens(
 
     // Calculate burn amount with decimals
     const burnAmount = Math.floor(amount * Math.pow(10, TOWER_TOKEN_CONFIG.decimals));
-
-    // Load token authority keypair to sign the burn
-    const TOKEN_AUTHORITY_PRIVATE_KEY = [
-      17,26,103,202,121,7,124,191,249,194,171,237,47,39,108,78,192,116,253,185,131,255,179,163,240,50,74,55,226,53,167,52,245,146,173,81,201,72,150,29,220,6,67,142,131,231,244,221,54,217,174,142,120,68,15,210,47,124,218,95,223,49,192,40
-    ];
-    const TOKEN_AUTHORITY_KEYPAIR = Keypair.fromSecretKey(new Uint8Array(TOKEN_AUTHORITY_PRIVATE_KEY));
 
     // Create burn instruction (transfer to null address / burn address)
     // Since Solana doesn't have a built-in burn instruction for SPL tokens,

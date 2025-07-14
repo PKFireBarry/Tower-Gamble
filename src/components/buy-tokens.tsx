@@ -170,7 +170,7 @@ export function BuyTokens({ onTokensPurchased }: BuyTokensProps) {
     };
 
     updateCalculations();
-  }, [solAmount]);
+  }, [solAmount, getTowerForSOL, getSOLPriceUSD]);
 
   // Handle SOL amount change
   const handleSolAmountChange = useCallback((value: number[]) => {

@@ -5,6 +5,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Wallet } from 'lucide-react';
 import { getSolanaExplorerUrl, truncateAddress } from '@/lib/utils';
+import Image from 'next/image';
 
 export function ModernHeader() {
   const { connected, publicKey } = useWallet();
@@ -16,10 +17,12 @@ export function ModernHeader() {
           {/* Logo and Title */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
-              <img 
+              <Image 
                 src="/logo.png" 
                 alt="Tower Gamble Logo" 
-                className="w-10 h-10 object-contain"
+                width={40}
+                height={40}
+                className="object-contain"
               />
               <div>
                 <h1 className="text-2xl font-bold gradient-text">Tower Gamble</h1>
