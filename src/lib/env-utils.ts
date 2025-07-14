@@ -12,9 +12,9 @@ export function getTreasuryKeypair(): Keypair | null {
   }
 
   // Server-side: Handle missing environment variable gracefully
-  const TREASURY_PRIVATE_KEY = process.env.TREASURY_PRIVATE_KEY;
+  const TREASURY_PRIVATE_KEY = process.env.NEXT_TREASURY_PRIVATE_KEY;
   if (!TREASURY_PRIVATE_KEY) {
-    console.warn('TREASURY_PRIVATE_KEY environment variable not set');
+    console.warn('NEXT_TREASURY_PRIVATE_KEY environment variable not set');
     return null;
   }
 
