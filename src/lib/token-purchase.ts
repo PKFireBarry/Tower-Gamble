@@ -94,6 +94,15 @@ export async function executePurchaseTransaction(
   sendTransaction: any
 ): Promise<{ success: boolean; tokenAmount: number; message: string; txHash?: string }> {
   try {
+    // Check if treasury operations are available
+    if (!isTreasuryAvailable()) {
+      return {
+        success: false,
+        tokenAmount: 0,
+        message: 'Token purchasing is currently unavailable'
+      };
+    }
+
     const tokenAmount = await getTowerForSOL(solAmount);
     
     // Create the purchase transaction
@@ -151,6 +160,15 @@ export async function sellTowerTokens(
   sendTransaction: any
 ): Promise<{ success: boolean; solAmount: number; message: string; txHash?: string }> {
   try {
+    // Check if treasury operations are available
+    if (!isTreasuryAvailable()) {
+      return {
+        success: false,
+        solAmount: 0,
+        message: 'Token selling is currently unavailable'
+      };
+    }
+
     const solAmount = await getSOLForTower(tokenAmount);
     
     // Create the sell transaction

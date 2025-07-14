@@ -5,22 +5,17 @@ import { Keypair } from '@solana/web3.js';
  * Returns null during build time to prevent deployment errors
  */
 export function getTreasuryKeypair(): Keypair | null {
-  // Don't load environment variables during build time
-  if (typeof window === 'undefined' && process.env.NODE_ENV === 'production' && !process.env.TREASURY_PRIVATE_KEY) {
-    console.warn('Treasury keypair not available during build time');
+  // Client-side: Treasury keypair should never be accessed from client
+  if (typeof window !== 'undefined') {
+    console.warn('Treasury keypair should not be accessed from client side');
     return null;
   }
 
+  // Server-side: Handle missing environment variable gracefully
   const TREASURY_PRIVATE_KEY = process.env.TREASURY_PRIVATE_KEY;
   if (!TREASURY_PRIVATE_KEY) {
-    if (typeof window === 'undefined') {
-      // Server-side: log warning but don't throw during build
-      console.warn('TREASURY_PRIVATE_KEY environment variable not set');
-      return null;
-    } else {
-      // Client-side: this shouldn't happen
-      throw new Error('TREASURY_PRIVATE_KEY environment variable not set');
-    }
+    console.warn('TREASURY_PRIVATE_KEY environment variable not set');
+    return null;
   }
 
   try {
