@@ -135,7 +135,7 @@ export function BuyTokens({ onTokensPurchased }: BuyTokensProps) {
     };
 
     initializeCalculations();
-  }, []); // Run once on mount
+  }, [solAmount]); // Run when solAmount changes
 
 
 
@@ -170,7 +170,7 @@ export function BuyTokens({ onTokensPurchased }: BuyTokensProps) {
     };
 
     updateCalculations();
-  }, [solAmount, getTowerForSOL, getSOLPriceUSD]);
+  }, [solAmount]);
 
   // Handle SOL amount change
   const handleSolAmountChange = useCallback((value: number[]) => {
