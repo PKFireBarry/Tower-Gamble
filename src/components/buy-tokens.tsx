@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { LAMPORTS_PER_SOL, Transaction } from '@solana/web3.js';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
@@ -201,20 +201,43 @@ export function BuyTokens({ onTokensPurchased }: BuyTokensProps) {
     setIsLoading(true);
 
     try {
-      const result = await executePurchaseTransaction(
-        publicKey,
-        solAmount,
-        sendTransaction
-      );
+      // Get the transaction from the server
+      const response = await fetch('/api/token/purchase', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          buyerWallet: publicKey.toString(),
+          solAmount: solAmount
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast.error(result.error || 'Failed to create purchase transaction');
+        return;
+      }
+
+      if (!result.success) {
+        toast.error(result.message || 'Purchase failed');
+        return;
+      }
+
+      // Deserialize and send the transaction
+      const transaction = Transaction.from(Buffer.from(result.transaction, 'base64'));
       
-      if (result.success) {
-        toast.success(result.message);
-        await getSolBalance();
-        if (onTokensPurchased) {
-          onTokensPurchased(result.tokenAmount);
-        }
-      } else {
-        toast.error(result.message);
+      // Send the transaction
+      const txHash = await sendTransaction(transaction, connection);
+      
+      // Wait for confirmation
+      await connection.confirmTransaction(txHash, 'confirmed');
+      
+      toast.success(`Successfully purchased ${result.tokenAmount.toFixed(2)} TOWER tokens!`);
+      await getSolBalance();
+      if (onTokensPurchased) {
+        onTokensPurchased(result.tokenAmount);
       }
       
     } catch (error) {

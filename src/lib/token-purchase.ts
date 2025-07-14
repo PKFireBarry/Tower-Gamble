@@ -74,12 +74,18 @@ export async function createTokenPurchaseTransaction(
     TREASURY_WALLET
   );
 
+  // Get treasury authority keypair
+  const authorityKeypair = getTokenAuthorityKeypairLazy();
+  if (!authorityKeypair) {
+    throw new Error('Treasury keypair not available - cannot create purchase transaction');
+  }
+
   // Add instruction to transfer tokens from treasury to buyer
   transaction.add(
     createTransferInstruction(
       treasuryTokenAccount, // from treasury
       buyerTokenAccount, // to buyer
-      getTokenAuthorityKeypairLazy()?.publicKey || TREASURY_WALLET, // treasury authority
+      authorityKeypair.publicKey, // treasury authority
       tokenAmount // amount (with decimals)
     )
   );
@@ -95,11 +101,12 @@ export async function executePurchaseTransaction(
 ): Promise<{ success: boolean; tokenAmount: number; message: string; txHash?: string }> {
   try {
     // Check if treasury operations are available
-    if (!isTreasuryAvailable()) {
+    const authorityKeypair = getTokenAuthorityKeypairLazy();
+    if (!authorityKeypair) {
       return {
         success: false,
         tokenAmount: 0,
-        message: 'Token purchasing is currently unavailable'
+        message: 'Token purchasing is currently unavailable - treasury not configured'
       };
     }
 
@@ -109,10 +116,7 @@ export async function executePurchaseTransaction(
     const transaction = await createTokenPurchaseTransaction(buyerWallet, solAmount);
     
     // Add the token authority as a signer for the mint instruction
-    const authorityKeypair = getTokenAuthorityKeypairLazy();
-    if (authorityKeypair) {
-      transaction.partialSign(authorityKeypair);
-    }
+    transaction.partialSign(authorityKeypair);
     
     // Send the transaction
     const txHash = await sendTransaction(transaction, connection);
@@ -161,11 +165,12 @@ export async function sellTowerTokens(
 ): Promise<{ success: boolean; solAmount: number; message: string; txHash?: string }> {
   try {
     // Check if treasury operations are available
-    if (!isTreasuryAvailable()) {
+    const TREASURY_KEYPAIR = getTreasuryKeypair();
+    if (!TREASURY_KEYPAIR) {
       return {
         success: false,
         solAmount: 0,
-        message: 'Token selling is currently unavailable'
+        message: 'Token selling is currently unavailable - treasury not configured'
       };
     }
 
@@ -197,12 +202,6 @@ export async function sellTowerTokens(
         tokenAmountWithDecimals
       )
     );
-    
-    // Load treasury keypair from environment variables
-    const TREASURY_KEYPAIR = getTreasuryKeypair();
-    if (!TREASURY_KEYPAIR) {
-      throw new Error('Treasury keypair not available - check environment configuration');
-    }
     
     // Transfer SOL from treasury to seller
     transaction.add(
